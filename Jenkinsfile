@@ -54,7 +54,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                   bash -c "source venv/bin/activate && nohup gunicorn -b :5000 -w 4 microblog:app &"
+                   bash -c "source venv/bin/activate && nohup gunicorn -b :5000 -w 4 microblog:app > gunicorn.log 2>&1 &"
                 '''
             }
         }
