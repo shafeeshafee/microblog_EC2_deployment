@@ -53,18 +53,9 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh '''#!/bin/bash
-                # Activate the virtual environment
-                source venv/bin/activate
-                
-                # Ensure gunicorn is installed within the venv
-                if ! pip show gunicorn > /dev/null 2>&1; then
-                    echo "Gunicorn is not installed in the virtual environment. Installing..."
-                    pip install gunicorn
-                fi
-                
-                # Restart the microblog application via Supervisor
-                sudo supervisorctl restart microblog
+                sh '''
+                    source venv/bin/activate
+                    nohup gunicorn -b :5000 -w 4 microblog:app &
                 '''
             }
         }
