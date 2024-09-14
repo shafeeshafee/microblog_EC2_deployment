@@ -4,10 +4,11 @@ pipeline {
         stage('Build') {
             steps {
                 sh '''#!/bin/bash
-                python3.9 -m venv venv
+                if [ ! -d "venv" ]; then
+                    python3.9 -m venv venv
+                fi
                 source venv/bin/activate
                 pip install -r requirements.txt
-                pip install gunicorn pymysql cryptography
                 export FLASK_APP=microblog.py
                 flask db upgrade
                 flask translate compile
@@ -31,8 +32,9 @@ pipeline {
         }
         stage('OWASP FS SCAN') {
             steps {
-                // TODO: remove disableUpdate for now.
-                // Because we are using this without an API Key, so the OWASP tool is unbearably slow.
+                sh '''#!/bin/bash
+                dependency-check.sh --purge
+                '''
                 dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit --noupdate', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
@@ -40,11 +42,12 @@ pipeline {
         stage('Clean') {
             steps {
                 sh '''#!/bin/bash
-                if [[ $(ps aux | grep -i "gunicorn" | tr -s " " | head -n 1 | cut -d " " -f 2) != 0 ]]
-                then
-                    ps aux | grep -i "gunicorn" | tr -s " " | head -n 1 | cut -d " " -f 2 > pid.txt
-                    kill $(cat pid.txt)
-                    exit 0
+                PID=$(pgrep gunicorn)
+                if [ -n "$PID" ]; then
+                    kill $PID
+                    echo "Killed gunicorn process with PID: $PID"
+                else
+                    echo "No gunicorn process running"
                 fi
                 '''
             }
@@ -53,7 +56,7 @@ pipeline {
             steps {
                 sh '''#!/bin/bash
                 source venv/bin/activate
-                nohup gunicorn -b :5000 -w 4 microblog:app &
+                nohup gunicorn -b :5000 -w 4 microblog:app > gunicorn.log 2>&1 &
                 '''
             }
         }
