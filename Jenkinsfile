@@ -15,17 +15,17 @@ pipeline {
       }
     }
     stage('Test') {
-      steps {
-        sh '''#!/bin/bash
+        steps {
+            sh '''#!/bin/bash
             source venv/bin/activate
-            pytest --junit-xml=test-reports/results.xml ./tests/unit/ --verbose
-        '''
-      }
-      post {
-        always {
-          junit 'test-reports/results.xml'
+            pytest --junit-xml=test-reports/results.xml ./tests/units/ --verbose
+            '''
         }
-      }
+        post {
+            always {
+            junit 'test-reports/results.xml'
+            }
+        }
     }
     stage ('OWASP FS SCAN') {
       steps {
