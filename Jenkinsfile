@@ -33,7 +33,7 @@ pipeline {
             steps {
                 // TODO: remove disableUpdate for now.
                 // Because we are using this without an API Key, so the OWASP tool is unbearably slow.
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit --disableUpdate', odcInstallation: 'DP-Check'
+                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit --noupdate', odcInstallation: 'DP-Check'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
