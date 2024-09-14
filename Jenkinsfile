@@ -54,7 +54,22 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''#!/bin/bash
-                gunicorn -b :5000 -w 4 microblog:app &
+                # Activate the virtual environment
+                source venv/bin/activate
+                
+                # Ensure gunicorn is installed within the venv
+                if ! pip show gunicorn > /dev/null 2>&1; then
+                    echo "Gunicorn is not installed in the virtual environment. Installing..."
+                    pip install gunicorn
+                fi
+                
+                # Check if gunicorn is already running
+                if pgrep -f "gunicorn"; then
+                    echo "Gunicorn is already running. Skipping start."
+                else
+                    echo "Gunicorn is not running. Starting gunicorn..."
+                    nohup gunicorn -b :5000 -w 4 microblog:app > gunicorn.log 2>&1 &
+                fi
                 '''
             }
         }
