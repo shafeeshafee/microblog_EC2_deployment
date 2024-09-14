@@ -51,9 +51,32 @@ pipeline {
                 '''
             }
         }
-        stage('Deploy') {
+       stage('Deploy') {
             steps {
-                sh 'sudo systemctl restart microblog'
+                sh '''#!/bin/bash
+                set -x  # Enable command echoing for debugging
+                
+                echo "Attempting to restart microblog service..."
+                if sudo systemctl restart microblog; then
+                    echo "Microblog service restarted successfully"
+                else
+                    echo "Failed to restart microblog service"
+                    sudo systemctl status microblog
+                    exit 1
+                fi
+                
+                echo "Waiting for service to stabilize..."
+                sleep 10
+                
+                echo "Checking service status..."
+                if sudo systemctl is-active --quiet microblog; then
+                    echo "Microblog service is active"
+                else
+                    echo "Microblog service failed to start"
+                    sudo systemctl status microblog
+                    exit 1
+                fi
+                '''
             }
         }
     }
