@@ -54,6 +54,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''#!/bin/bash
+                    # Change to the correct directory
+                    cd /home/ubuntu/microblog_EC2_deployment
+
                     # Activate virtual environment
                     . venv/bin/activate
                     
