@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh '''#!/bin/bash
+                sh '''#!/usr/bin/env bash
                 if [ ! -d "venv" ]; then
                     python3.9 -m venv venv
                 fi
@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh '''#!/bin/bash
+                sh '''#!/usr/bin/env bash
                 source venv/bin/activate
                 export PYTHONPATH=$PYTHONPATH:$(pwd)
                 export FLASK_APP=microblog.py
@@ -32,7 +32,7 @@ pipeline {
         }
         // stage('OWASP FS SCAN') {
         //     steps {
-        //         sh '''#!/bin/bash
+        //         sh '''#!/usr/bin/env bash
         //         /var/lib/jenkins/tools/org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation/DP-Check/bin/dependency-check.sh --scan ./ --disableYarnAudit --disableNodeAudit
         //         '''
         //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
@@ -40,7 +40,7 @@ pipeline {
         // }
         stage('Clean') {
             steps {
-                sh '''#!/bin/bash
+                sh '''#!/usr/bin/env bash
                 PID=$(pgrep gunicorn)
                 if [ -n "$PID" ]; then
                     kill $PID
@@ -54,7 +54,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                    #!/bin/bash
+                    #!/usr/bin/env bash
                     source venv/bin/activate
                     nohup gunicorn -b :5000 -w 4 microblog:app &
                 '''
