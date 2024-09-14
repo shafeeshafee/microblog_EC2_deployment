@@ -51,34 +51,23 @@ pipeline {
                 '''
             }
         }
-        stage('Deploy') {
-            steps {
-                sh '''#!/bin/bash
-                    # Change to the correct directory
-                    cd /home/ubuntu/microblog_EC2_deployment
-
-                    # Activate virtual environment
-                    . venv/bin/activate
-                    
-                    # Kill any existing Gunicorn processes
-                    pkill gunicorn || true
-                    
-                    # Start Gunicorn with 2 workers
-                    nohup gunicorn -b :5000 -w 2 microblog:app > gunicorn.log 2>&1 &
-                    
-                    # Wait a moment for Gunicorn to start
-                    sleep 5
-                    
-                    # Check if Gunicorn is running
-                    if pgrep -f gunicorn > /dev/null
-                    then
-                        echo "Gunicorn started successfully"
-                    else
-                        echo "Failed to start Gunicorn"
-                        cat gunicorn.log
-                        exit 1
-                    fi
-                '''
+            stage('Deploy') {
+                steps {
+                    sh '''#!/bin/bash
+                        cd /home/ubuntu/microblog_EC2_deployment
+                        source venv/bin/activate
+                        pkill gunicorn || true
+                        nohup gunicorn -b :5000 -w 2 microblog:app > gunicorn.log 2>&1 &
+                        disown
+                        sleep 5
+                        if pgrep -f gunicorn > /dev/null; then
+                            echo "Gunicorn started successfully"
+                        else
+                            echo "Failed to start Gunicorn"
+                            cat gunicorn.log
+                            exit 1
+                        fi
+                    '''
             }
         }
     }
