@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh '''#!/usr/bin/env bash
+                sh '''#!/bin/bash
                 if [ ! -d "venv" ]; then
                     python3.9 -m venv venv
                 fi
@@ -17,7 +17,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh '''#!/usr/bin/env bash
+                sh '''#!/bin/bash
                 source venv/bin/activate
                 export PYTHONPATH=$PYTHONPATH:$(pwd)
                 export FLASK_APP=microblog.py
@@ -32,7 +32,7 @@ pipeline {
         }
         // stage('OWASP FS SCAN') {
         //     steps {
-        //         sh '''#!/usr/bin/env bash
+        //         sh '''#!/bin/bash
         //         /var/lib/jenkins/tools/org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation/DP-Check/bin/dependency-check.sh --scan ./ --disableYarnAudit --disableNodeAudit
         //         '''
         //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
@@ -40,7 +40,7 @@ pipeline {
         // }
         stage('Clean') {
             steps {
-                sh '''#!/usr/bin/env bash
+                sh '''#!/bin/bash
                 PID=$(pgrep gunicorn)
                 if [ -n "$PID" ]; then
                     kill $PID
@@ -54,7 +54,26 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                   bash -c "source venv/bin/activate && nohup gunicorn -b :5000 -w 4 microblog:app > gunicorn.log 2>&1 &"
+                    #!/bin/bash
+                    source venv/bin/activate
+                    
+                    # Kill any existing Gunicorn processes
+                    pkill gunicorn
+
+                    # Start Gunicorn with 2 workers
+                    nohup gunicorn -b :5000 -w 2 microblog:app > gunicorn.log 2>&1 &
+                    
+                    # Wait a moment for Gunicorn to start
+                    sleep 5
+                    
+                    # Check if Gunicorn is running
+                    if pgrep -f gunicorn > /dev/null
+                    then
+                        echo "Gunicorn started successfully"
+                    else
+                        echo "Failed to start Gunicorn"
+                        exit 1
+                    fi
                 '''
             }
         }
