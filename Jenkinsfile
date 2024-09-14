@@ -33,9 +33,11 @@ pipeline {
         stage('OWASP FS SCAN') {
             steps {
                 sh '''#!/bin/bash
-                dependency-check.sh --purge
+                /var/lib/jenkins/tools/org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation/DP-Check/bin/dependency-check.sh --purge
                 '''
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit --noupdate', odcInstallation: 'DP-Check'
+                sh '''#!/bin/bash
+                /var/lib/jenkins/tools/org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation/DP-Check/bin/dependency-check.sh --scan ./ --disableYarnAudit --disableNodeAudit --noupdate
+                '''
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
