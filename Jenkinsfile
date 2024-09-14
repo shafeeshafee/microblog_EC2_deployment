@@ -53,13 +53,13 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh '''
-                    #!/bin/bash
-                    source venv/bin/activate
+                sh '''#!/bin/bash
+                    # Activate virtual environment
+                    . venv/bin/activate
                     
                     # Kill any existing Gunicorn processes
-                    pkill gunicorn
-
+                    pkill gunicorn || true
+                    
                     # Start Gunicorn with 2 workers
                     nohup gunicorn -b :5000 -w 2 microblog:app > gunicorn.log 2>&1 &
                     
@@ -72,6 +72,7 @@ pipeline {
                         echo "Gunicorn started successfully"
                     else
                         echo "Failed to start Gunicorn"
+                        cat gunicorn.log
                         exit 1
                     fi
                 '''
