@@ -23,7 +23,7 @@ pipeline {
                 source venv/bin/activate
                 export PYTHONPATH=$PYTHONPATH:$(pwd)
                 export FLASK_APP=microblog.py
-                pytest --junit-xml=test-reports/results.xml ./tests/units/ --verbose
+                pytest --junit-xml=test-reports/results.xml ./tests/unit/ --verbose
                 '''
             }
             post {
