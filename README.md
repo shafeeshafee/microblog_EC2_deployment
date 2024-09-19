@@ -34,6 +34,16 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 
    - Started the application using `gunicorn -b :5000 -w 4 microblog:app` and accessed it on the browser to confirm it's running. Making sure the application runs correctly in a manual setup ensures the environment is properly configured before automating the deployment.
 
+---
+
+**Note:** Were the above steps involving setting up the Python virtual environment, installing dependencies, configuring environment variables, preparing the application for deployment, configuring Nginx, and launching with Gunicorn absolutely necessary for the CI/CD pipeline?
+
+**Short answer**: _no._
+
+**Long answer**: while these steps were useful for initially configuring and testing the application manually, they're not really necessary to do so when using a CI/CD pipeline. Instead, the real idea of these steps is that we can test these are running locally before it can be run before automating it within the pipeline's build and deploy stages to ensure consistency and repeatability. Automating these processes reduces the potential for manual errors and aligns with the principles of continuous integration and deployment.
+
+---
+
 7. **Automated the Pipeline with Jenkins**
 
    - Edited the Jenkinsfile to automate the build, test, and deploy stages, including commands to set up the environment, install dependencies, run tests, and deploy the application. Automating these steps in the CI/CD pipeline ensures consistent deployments and reduces manual errors.
@@ -85,12 +95,6 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
     !["Website screenshot, Grafana 2](./screenshot_grafana_2.png)
 
 ---
-
-**Note:** Were the steps involving setting up the Python virtual environment, installing dependencies, configuring environment variables, preparing the application for deployment, configuring Nginx, and launching with Gunicorn absolutely necessary for the CI/CD pipeline?
-
-**Short answer**: _no._
-
-**Long answer**: while these steps were useful for initially configuring and testing the application manually, they're not really necessary to do so when using a CI/CD pipeline. Instead, the real meat of these steps is that it should be automated within the pipeline's build and deploy stages to ensure consistency and repeatability. Automating these processes reduces the potential for manual errors and aligns with the principles of continuous integration and deployment.
 
 ## Issues/Troubleshooting
 
@@ -150,9 +154,9 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 
 ## Optimization
 
-### Advantages of Provisioning Own Resources
+### The Power of Provisioning It Ourselves
 
-Provisioning our own infrastructure instead of relying on managed services like AWS Elastic Beanstalk offers several key advantages:
+Provisioning our own infrastructure instead of relying on managed services like AWS Elastic Beanstalk offers several key benefits:
 
 - Self-provisioning grants complete control over every aspect of the infrastructure. This allows for tailored configurations to meet specific application needs, such as choosing exact instance types, customizing network settings, and installing required software without the limitations imposed by managed services.
 
