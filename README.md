@@ -42,15 +42,36 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 
    - Created a unit test script `test_app.py` in the `tests/unit/` directory to test application functionality, and included the test execution in the Jenkins pipeline. Automated testing catches issues early, maintaining code quality and reliability.
 
-9. **Set Up Continuous Deployment and Service Management**
+9. **OWASP Scanning**
 
-   - Created a `systemd` service for the application to manage it as a background process, modified the Jenkins deploy stage to restart the service, and adjusted permissions to allow Jenkins to manage the service without requiring a password. Managing the application as a service ensures it runs continuously and restarts automatically, while automation in the pipeline enhances efficiency.
+   - Got an OWASP API Key in order to scan my project's dependencies.
 
-   With this step we can finally see our website running on successful Jenkins build updates.
+   **Below is the summary of the results found in dependency-check-report.xml in my workspace:**
 
-   !["Website screenshot, Microblog site](./screenshot_1.png)
+   | File Name     | File Path                                              | SHA-256 Hash (truncated)  | Vulnerability ID                             | Confidence |
+   | ------------- | ------------------------------------------------------ | ------------------------- | -------------------------------------------- | ---------- |
+   | cli-32.exe    | /var/lib/jenkins/.../setuptools/cli-32.exe             | 32acc1bc543116cbe2cff...  | cpe:2.3:a:cli*project:cli:32:*:_:_:_:_:\_:\* | HIGH       |
+   | cli-64.exe    | /var/lib/jenkins/.../setuptools/cli-64.exe             | bbb3de5707629e6a60a0c...  | cpe:2.3:a:cli*project:cli:64:*:_:_:_:_:\_:\* | HIGH       |
+   | debugger.js   | /var/lib/jenkins/.../werkzeug/debug/shared/debugger.js | 155041522af3e2429e748...  | None identified                              | N/A        |
+   | gui-32.exe    | /var/lib/jenkins/.../setuptools/gui-32.exe             | 85dae1e95d77845f2cb59...  | None identified                              | N/A        |
+   | gui-64.exe    | /var/lib/jenkins/.../setuptools/gui-64.exe             | 3471b6140eadc6412277d...  | None identified                              | N/A        |
+   | gui-arm64.exe | /var/lib/jenkins/.../setuptools/gui-arm64.exe          | e694f4743405c8b5926ff...  | None identified                              | N/A        |
+   | t32.exe       | /var/lib/jenkins/.../pip/\_vendor/distlib/t32.exe      | 6b4195e640a85ac32eb6f...  | None identified                              | N/A        |
+   | t64-arm.exe   | /var/lib/jenkins/.../pip/\_vendor/distlib/t64-arm.exe  | ebc4c06b7d95e74e315419... | None identified                              | N/A        |
+   | t64.exe       | /var/lib/jenkins/.../pip/\_vendor/distlib/t64.exe      | 81a618f21cb87db9076134... | None identified                              | N/A        |
+   | w32.exe       | /var/lib/jenkins/.../pip/\_vendor/distlib/w32.exe      | 47872cc77f8e18cf642f8...  | None identified                              | N/A        |
+   | w64-arm.exe   | /var/lib/jenkins/.../pip/\_vendor/distlib/w64-arm.exe  | c5dc9884a8f458371550e...  | None identified                              | N/A        |
+   | w64.exe       | /var/lib/jenkins/.../pip/\_vendor/distlib/w64.exe      | 7a319ffaba23a017d7b1e...  | None identified                              | N/A        |
 
-10. **Implemented Monitoring with Prometheus and Grafana**
+10. **Set Up Continuous Deployment and Service Management**
+
+    - Created a `systemd` service for the application to manage it as a background process, modified the Jenkins deploy stage to restart the service, and adjusted permissions to allow Jenkins to manage the service without requiring a password. Managing the application as a service ensures it runs continuously and restarts automatically, while automation in the pipeline enhances efficiency.
+
+    With this step we can finally see our website running on successful Jenkins build updates.
+
+    !["Website screenshot, Microblog site](./screenshot_1.png)
+
+11. **Implemented Monitoring with Prometheus and Grafana**
 
     - Set up a new EC2 instance named "Monitoring", installed Prometheus and Grafana, configured them to collect metrics from the Jenkins server and application, and set up dashboards for visualization. Monitoring provides insights into application performance and server health, allowing for proactive issue detection and resource management.
 
