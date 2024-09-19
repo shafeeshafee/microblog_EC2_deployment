@@ -8,7 +8,9 @@ pipeline {
                     python3.9 -m venv venv
                 fi
                 source venv/bin/activate
+                pip install --upgrade pip
                 pip install -r requirements.txt
+                pip install gunicorn pymysql cryptography
                 export FLASK_APP=microblog.py
                 flask db upgrade
                 flask translate compile
