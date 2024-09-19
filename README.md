@@ -81,7 +81,13 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 
     !["Website screenshot, Microblog site](./screenshot_1.png)
 
-11. **Implemented Monitoring with Prometheus and Grafana**
+11. **Installing the Node Exporter on Jenkins Server**
+
+    - Issue: Needed system metrics collection for monitoring Jenkins.- Fix: Installed Prometheus Node Exporter on the Jenkins server, configured it as a systemd service, allowed necessary firewall ports, and enabled the service to run on startup.
+
+    !["Node exporter"](./screenshot_4.png)
+
+12. **Implemented Monitoring with Prometheus and Grafana**
 
     - Set up a new EC2 instance named "Monitoring", installed Prometheus and Grafana, configured them to collect metrics from the Jenkins server and application, and set up dashboards for visualization. Monitoring provides insights into application performance and server health, allowing for proactive issue detection and resource management.
 
@@ -111,12 +117,13 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 3. **Dependency-Check Plugin Delay**
 
    - Issue: The OWASP Dependency-Check plugin took excessive time due to a missing NVD API key.
-   - Fix: Temporarily commented out the OWASP scan in the Jenkinsfile to allow the pipeline to proceed. Noted the need to obtain an NVD API key to speed up future scans.
+   - Fix 1: Temporarily commented out the OWASP scan in the Jenkinsfile to allow the pipeline to proceed. Noted the need to obtain an NVD API key to speed up future scans.
+   - Fix 2: Received API key, added to Jenkins credentials, scanned everything and we were good to go!
 
 4. **Jenkinsfile Errors**
 
    - Issue: Encountered errors in the Jenkinsfile, such as incorrect commands and path issues.
-   - Fix: Corrected syntax errors, ensured the virtual environment was activated in each stage, and adjusted file paths.
+   - Fix: Corrected syntax errors, ensured the virtual environment was activated in each stage, gave Jenkins ability to run systemd commands for `microblog`, and adjusted file paths.
 
 5. **ModuleNotFoundError During Testing:**
 
@@ -125,8 +132,8 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 
 6. **Gunicorn Worker Count**
 
-   - Issue: The t3.micro instance couldn't handle 4 Gunicorn workers, causing high CPU usage and freezing.
-   - Fix: Switched to a t3.medium.
+   - Issue: The `t3.micro` instance couldn't handle 4 Gunicorn workers, causing high CPU usage and freezing.
+   - Fix: Switched to a `t3.medium`.
 
 7. **OWASP Dependency-Check Plugin Slowness:**
 
@@ -135,13 +142,20 @@ It involves setting up a continuous CI/CD pipeline using Jenkins, automating the
 
 8. **Reassessing the Clean Stage:**
 
-   - Issue: The Clean stage in our Jenkinsfile attempts to kill Gunicorn processes but fails due to permission issues.
-   - Fix: Recognize that managing Gunicorn via `systemd` negates the need for this stage (read issue #9), and consider removing or modifying it accordingly.
+   - Issue: The Clean stage in our Jenkinsfile attempts to kill Gunicorn processes but fails due to permission issues, AND only kills one of the child workers but not the main process.
+   - Fix: Recognize that managing Gunicorn via `systemd` negates the need for this stage (read issue #9), and consider removing or modifying it accordingly. Use `systemctl` to restart the process.
 
 9. **Background Processes Terminating**
 
    - Issue: The application process terminated when the pipeline completed.
    - Fix: Created a `systemd` service to manage the Gunicorn process, ensuring it runs continuously in the background.
+     - With `systemd` whenever you add something, you have to reload the daemon, enable the service, start it, and check the status:
+       ```bash
+          sudo systemctl daemon-reload
+          sudo systemctl enable microblog
+          sudo systemctl start microblog
+          sudo systemctl status microblog
+       ```
 
 10. **IP Address Changes**
 
@@ -171,13 +185,13 @@ Assessing the quality of this system involves weighing its strengths against its
 **Strengths:**
 
 - The system effectively deploys the application using a CI/CD pipeline with Jenkins, incorporates automated testing, and sets up monitoring with Prometheus and Grafana.
-- The process offers a comprehensive learning experience in setting up and managing infrastructure manually, deepening our understanding of deployment processes and tools.
+- The process offers a comprehensive learning experience in setting up and managing infrastructure manually, which helps us understand the deployment processes and tools.
 
 **Weaknesses:**
 
 - Manual server provisioning and configuration introduce complexities and are time-consuming. This approach increases the risk of human error and makes scaling difficult.
 - The current setup lacks mechanisms for automatic scaling to handle variable workloads, which could lead to performance issues under high traffic.
-- Without robust security measures, manually managed infrastructure can be vulnerable to misconfigurations and unauthorized access.
+- Without granular security measures, manually managed infrastructure can be vulnerable to misconfigurations and unauthorized access.
 - Resource contention! Hosting both Jenkins and the application on the same EC2 instance can lead to resource contention, affecting the performance and reliability of both services.
 
 So while the system serves its purpose and provides valuable hands-on experience, it falls short of being a "good system" in a production context. It lacks scalability, well-rounded security, and efficient resource management, which are good traits of a production-grade environment.
@@ -197,7 +211,7 @@ So while the system serves its purpose and provides valuable hands-on experience
 5. Implement Auto Scaling and Load Balancing:
    - Use Auto Scaling Groups and Elastic Load Balancers to manage application instances. Auto scaling adjusts the number of running instances based on demand, providing high availability and optimal performance. Load balancing distributes incoming traffic evenly, preventing any single instance from becoming a bottle neck.
 6. Enhance Security Measures:
-   - Apply robust security practices, including:
+   - Apply security practices, including:
      - Configuring IAM roles with the principle of least privilege.
      - Tightening security group rules to allow only necessary traffic.
      - Regularly updating and patching servers.
