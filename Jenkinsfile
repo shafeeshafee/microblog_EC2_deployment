@@ -30,14 +30,14 @@ pipeline {
                 }
             }
         }
-        // stage('OWASP FS SCAN') {
-        //     steps {
-        //         sh '''#!/bin/bash
-        //         /var/lib/jenkins/tools/org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation/DP-Check/bin/dependency-check.sh --scan ./ --disableYarnAudit --disableNodeAudit
-        //         '''
-        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-        //     }
-        // }
+        stage('OWASP FS SCAN') {
+            steps {
+                withCredentials([string(credentialsId: 'NVD_API_KEY', variable: 'NVD_API_KEY')]) {
+                    dependencyCheck additionalArguments: "--scan ./ --disableYarnAudit --disableNodeAudit --nvdApiKey ${NVD_API_KEY}", odcInstallation: 'DP-Check'
+                    dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                }
+            }
+        }
         stage('Clean') {
             steps {
                 sh '''#!/bin/bash
